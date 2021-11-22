@@ -18,6 +18,7 @@ const moment    = require('moment');
 const parse     = require('csv-parse');
 const mongoose = require('mongoose');
 
+
 const successFd = fs.openSync(`${__dirname}/success.csv`, 'w');
 const errorFd = fs.openSync(`${__dirname}/error.csv`, 'w');
 const letterTemplate = fs.readFileSync(`${__dirname}/letter_template.html`).toString();
