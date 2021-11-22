@@ -1,14 +1,15 @@
 
 // 'use strict';
+const env = require('dotenv').config();
 
 // connecting lob API
-const Lob = require('lob')('test_API');
+const Lob = require('lob')(process.env.LOB_TEST_KEY);
 
 // connecting contentful cms
 const contentful = require('contentful');
 const clientele = contentful.createClient({
-  space: 'SPACE_ID',
-  accessToken: 'TOKEN_ID'
+  space: process.env.SPACE_ID,
+  accessToken: process.env.TOKEN_ID
 });
 
 const converter = require('json-2-csv');
@@ -22,17 +23,17 @@ const errorFd = fs.openSync(`${__dirname}/error.csv`, 'w');
 const letterTemplate = fs.readFileSync(`${__dirname}/letter_template.html`).toString();
 
 const companyInfo = {
-  name: 'Deluxe Virgina Realty',
-  address_line1: '185 Berry St.',
-  address_line2: 'Ste 170',
-  address_city: 'San Francisco',
-  address_state: 'CA',
-  address_zip: 94107,
-  address_country: 'US'
+  name: process.env.SENDER_NAME,
+  address_line1: process.env.SENDER_STREET,
+  address_line2: process.env.SENDER_APARTMENT,
+  address_city: process.env.SENDER_CITY,
+  address_state: process.env.SENDER_STATE,
+  address_zip: process.env.SENDER_ZIPCODE,
+  address_country: process.env.SENDER_COUNTRY
 };
 
 
-mongoose.connect('mongodb://localhost:27017/db', {
+mongoose.connect(process.env.DB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true})
 .then(() => console.log('Mongo Connection Open'))
@@ -49,14 +50,14 @@ const userSchema = new mongoose.Schema({
     address_country: String
   });
 
-  const collection = mongoose.model('collection', userSchema);
+  const eod17nov = mongoose.model('eod17nov', userSchema);
   
-  
-  collection.find({}, (err, data) => {
+  eod17nov.find({}, (err, data) => {
     if (err) {
         return console.log(err);
     } 
 
+  // Iterate through Address and Merge variable documents in your collection
     data.map((customer) => {
        
   const client = customer.toObject();
@@ -68,11 +69,11 @@ const userSchema = new mongoose.Schema({
       secondary_line:  client.apartment,
       city:  client.city,
       state:  client.state,
-      zip_code:  client.zip_code
+      zip_code:  client.zip_code,
+      country: client.country
    }
 
-
-
+//create your letters using LOB API
     Lob.letters.create({
     description: `Automated Past Due Bill for ${name}`,
     to: {
@@ -82,7 +83,7 @@ const userSchema = new mongoose.Schema({
       address_city: address.city,
       address_state: address.state,
       address_zip: address.zip_code,
-      address_country: 'US'
+      address_country: address.country
     },
     from: companyInfo,
     file: letterTemplate,

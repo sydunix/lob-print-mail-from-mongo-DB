@@ -2,8 +2,9 @@
 // 'use strict';
 
 var mongoose = require('mongoose');
+const env = require('dotenv').config();
 
-mongoose.connect('mongodb://localhost:27017/db', {
+mongoose.connect(process.env.DB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true})
 .then(() => console.log('Mongo Connection Open'))
@@ -21,7 +22,7 @@ const userSchema = new mongoose.Schema({
     country: String
   });
   
-  const collection = mongoose.model('collection', userSchema);
+  const eod17nov = mongoose.model('eod17nov', userSchema);
 
   const wed17nov2021 = [
     {
@@ -104,7 +105,7 @@ const userSchema = new mongoose.Schema({
 
     ];
 
-    collection.insertMany(wed17nov2021)
+    eod17nov.insertMany(wed17nov2021)
     .then(value => {
         console.log("Saved Successfully");
     })
